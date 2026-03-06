@@ -37,24 +37,52 @@
             animation: fadeIn 1s ease-in-out;
         }
 
-        .header {
+        /* Initial State - Button Only */
+        .initial-state {
+            text-align: center;
+        }
+
+        .initial-state h1 {
+            color: #e0e0e0;
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
             opacity: 0;
             animation: fadeInDown 0.8s ease-out forwards;
+        }
+
+        .initial-state p {
+            color: #b0b0b0;
+            font-size: 0.95rem;
+            font-weight: 300;
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeInDown 0.8s ease-out 0.2s forwards;
+        }
+
+        /* Message Content - Hidden Initially */
+        .message-content {
+            display: none;
+            opacity: 0;
+        }
+
+        .message-content.show {
+            display: block;
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        .header {
             margin-bottom: 30px;
         }
 
         .header h1 {
             color: #e0e0e0;
-            font-size: 2.5rem;
+            font-size: 3rem;
             font-weight: 300;
             letter-spacing: 2px;
             margin-bottom: 10px;
-        }
-
-        .header p {
-            color: #b0b0b0;
-            font-size: 0.95rem;
-            font-weight: 300;
+            animation: fadeInDown 0.8s ease-out forwards;
         }
 
         .typing-message {
@@ -126,7 +154,7 @@
 
         .button-container {
             margin-top: 40px;
-            animation: fadeInUp 1s ease-out 0.3s forwards;
+            animation: fadeInUp 1s ease-out 0.4s forwards;
             opacity: 0;
         }
 
@@ -169,10 +197,6 @@
             cursor: not-allowed;
         }
 
-        .hidden {
-            display: none;
-        }
-
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .message-box {
@@ -180,7 +204,7 @@
             }
 
             .header h1 {
-                font-size: 2rem;
+                font-size: 2.2rem;
             }
 
             .message-text {
@@ -196,6 +220,11 @@
         @media (max-width: 480px) {
             .message-box {
                 padding: 30px 20px;
+            }
+
+            .initial-state h1 {
+                font-size: 1.8rem;
+                letter-spacing: 1px;
             }
 
             .header h1 {
@@ -226,18 +255,29 @@
 <body>
     <div class="container">
         <div class="message-box">
-            <div class="header">
-                <h1>I'm Sorry</h1>
-                <p>Read what's in my heart</p>
+            <!-- Initial State: Just Button -->
+            <div class="initial-state" id="initialState">
+                <h1>I Need To Say Something</h1>
+                <p>I have something important to tell you</p>
+                <div class="button-container">
+                    <button id="revealBtn">Read What's In My Heart</button>
+                </div>
             </div>
 
-            <div class="typing-message">
-                <span class="message-text" id="messageText"></span>
-                <span class="typing-cursor" id="cursor"></span>
-            </div>
+            <!-- Message Content: Hidden Until Button Clicked -->
+            <div class="message-content" id="messageContent">
+                <div class="header">
+                    <h1>I'm Sorry</h1>
+                </div>
 
-            <div class="button-container">
-                <button id="revealBtn">Read My Message</button>
+                <div class="typing-message">
+                    <span class="message-text" id="messageText"></span>
+                    <span class="typing-cursor" id="cursor"></span>
+                </div>
+
+                <div class="button-container">
+                    <button id="restartBtn">Start Over</button>
+                </div>
             </div>
         </div>
     </div>
@@ -247,6 +287,9 @@
         const messageElement = document.getElementById('messageText');
         const cursorElement = document.getElementById('cursor');
         const revealBtn = document.getElementById('revealBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const initialState = document.getElementById('initialState');
+        const messageContent = document.getElementById('messageContent');
 
         let isTyping = false;
         let currentIndex = 0;
@@ -258,6 +301,7 @@
             cursorElement.classList.add('active');
             messageElement.classList.add('visible');
             revealBtn.disabled = true;
+            restartBtn.disabled = true;
 
             function type() {
                 if (currentIndex < fullMessage.length) {
@@ -267,19 +311,43 @@
                 } else {
                     isTyping = false;
                     cursorElement.classList.remove('active');
-                    revealBtn.disabled = false;
+                    restartBtn.disabled = false;
                 }
             }
 
             type();
         }
 
-        revealBtn.addEventListener('click', typeMessage);
-
-        // Auto-start typing animation on page load
-        window.addEventListener('load', () => {
+        function revealMessage() {
+            // Hide initial state
+            initialState.style.display = 'none';
+            
+            // Show message content with animation
+            messageContent.classList.add('show');
+            
+            // Start typing after animation
             setTimeout(typeMessage, 500);
-        });
+        }
+
+        function restartExperience() {
+            // Reset typing
+            currentIndex = 0;
+            messageElement.textContent = '';
+            cursorElement.classList.remove('active');
+            messageElement.classList.remove('visible');
+            
+            // Hide message content
+            messageContent.classList.remove('show');
+            
+            // Show initial state after animation
+            setTimeout(() => {
+                messageContent.style.display = 'none';
+                initialState.style.display = 'block';
+            }, 300);
+        }
+
+        revealBtn.addEventListener('click', revealMessage);
+        restartBtn.addEventListener('click', restartExperience);
     </script>
 </body>
 </html>
