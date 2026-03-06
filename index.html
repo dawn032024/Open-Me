@@ -15,692 +15,534 @@
             --accent-color: #8e7dbe;
             --text-dark: #3d3d3d;
             --paper-color: #fffbf7;
+            --paper-shadow: rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
             background: linear-gradient(135deg, var(--bg-color) 0%, #f5ede5 100%);
             font-family: 'Poppins', sans-serif;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            overflow: hidden;
+            padding: 20px;
         }
 
         .wrapper {
             position: relative;
-            width: 100%;
-            max-width: 450px;
+            perspective: 1200px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            width: 100%;
+            max-width: 450px;
         }
 
-        /* ===== THE ENVELOPE ===== */
-        .envelope-wrapper {
+        /* ===== ENVELOPE STYLES ===== */
+        .envelope-container {
             position: relative;
-            width: 400px;
+            width: 100%;
             height: 280px;
-            background-color: var(--envelope-color);
-            border-radius: 0 0 8px 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            z-index: 1; /* Sits behind the letter when sliding out */
+            perspective: 1200px;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
-        /* Front of the envelope (The part with the names) */
+        .envelope {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+
+        /* Envelope Front (Base) */
         .envelope-front {
             position: absolute;
             width: 100%;
             height: 100%;
-            z-index: 10; /* Always in front of the letter */
             background: linear-gradient(135deg, var(--envelope-color) 0%, #e8dcc8 100%);
-            clip-path: polygon(0 0, 0 100%, 100% 100%, 100% 0, 50% 50%);
+            border: 2px solid var(--envelope-shadow);
+            border-radius: 4px;
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.12),
+                inset -1px -1px 3px rgba(0, 0, 0, 0.05);
+            z-index: 1;
             display: flex;
-            padding: 30px;
-            border-radius: 0 0 8px 8px;
+            align-items: center;
+            justify-content: center;
+            transform-style: preserve-3d;
+            transition: opacity 0.6s ease 0.2s;
         }
 
+        .envelope-front.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Envelope Labels */
         .envelope-labels {
-            font-size: 0.9rem;
-            color: #777;
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            text-align: left;
+            font-size: 0.85rem;
+            color: #666;
             line-height: 1.8;
-            margin-top: 50px; /* Keep them below the flap area */
+            pointer-events: none;
+            transition: opacity 0.3s;
         }
 
-        .envelope-labels strong { color: var(--text-dark); }
+        .envelope-labels.hide {
+            opacity: 0;
+        }
 
-        /* The Flap */
-        .flap {
+        .envelope-labels strong {
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        /* Envelope Back */
+        .envelope-back {
             position: absolute;
-            top: 0;
             width: 100%;
             height: 100%;
-            background-color: var(--envelope-color);
-            clip-path: polygon(0 0, 100% 0, 50% 50%);
-            transform-origin: top;
-            transition: transform 1.2s ease-in-out, z-index 0.6s;
-            z-index: 11; /* Initially in front of everything */
-            border-radius: 4px 4px 0 0;
+            background: linear-gradient(135deg, #e8dcc8 0%, #e0d0bc 100%);
+            border: 2px solid var(--envelope-shadow);
+            border-radius: 4px;
+            z-index: 2;
+            transform: rotateY(0deg);
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
-        .wrapper.open .flap {
-            transform: rotateX(180deg);
-            z-index: 0; /* Flip behind once open */
-        }
-
-        /* ===== THE LETTER ===== */
-        .letter {
+        /* Envelope Flap (Top Triangle) */
+        .envelope-flap {
             position: absolute;
-            bottom: 5px;
-            width: 90%;
-            background: var(--paper-color);
-            padding: 40px 30px;
-            box-sizing: border-box;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            z-index: 5; /* Starts inside (between front and back) */
-            transition: transform 1.2s ease-in-out, opacity 0.8s;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-left: 225px solid transparent;
+            border-right: 225px solid transparent;
+            border-top: 140px solid var(--envelope-color);
+            z-index: 3;
+            transform-origin: top center;
+            transform-style: preserve-3d;
+            transition: transform 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            cursor: pointer;
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.08));
+        }
+
+        .envelope-flap::before {
+            content: '';
+            position: absolute;
+            top: -140px;
+            left: -225px;
+            width: 450px;
+            height: 140px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.03) 0%, transparent 100%);
+        }
+
+        /* Animation: Open Envelope */
+        .wrapper.open .envelope-flap {
+            transform: rotateX(-170deg);
+        }
+
+        .wrapper.open .envelope-back {
+            transform: rotateY(100deg);
+        }
+
+        .wrapper.open .envelope-front {
             opacity: 0;
-            border: 1px solid #f0e8d9;
-            text-align: center;
+            pointer-events: none;
         }
 
-        .wrapper.open .letter {
-            transform: translateY(-300px); /* Slides OUT and UP */
+        /* ===== LETTER STYLES ===== */
+        .letter-container {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(100%) rotateX(0deg);
+            transform-style: preserve-3d;
+            width: 85%;
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.4s;
+            z-index: 4;
+        }
+
+        .wrapper.open .letter-container {
+            transform: translateX(-50%) translateY(-20px) rotateX(0deg);
             opacity: 1;
-            z-index: 15; /* Becomes the top layer */
         }
 
+        .letter {
+            background: linear-gradient(135deg, var(--paper-color) 0%, #fffef9 100%);
+            border: 1px solid #e8dcc8;
+            border-radius: 3px;
+            padding: 45px 35px;
+            box-shadow: 
+                0 20px 50px var(--paper-shadow),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            position: relative;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .letter::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(142, 125, 190, 0.02) 2px,
+                    rgba(142, 125, 190, 0.02) 4px
+                );
+            pointer-events: none;
+            border-radius: 3px;
+        }
+
+        .letter-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Letter Title */
         .letter-title {
             font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
             font-style: italic;
             color: var(--accent-color);
-            font-size: 2rem;
-            margin-bottom: 20px;
+            text-align: center;
+            margin-bottom: 35px;
+            letter-spacing: 2px;
         }
 
+        /* Letter Main Text */
         .letter-text {
             font-family: 'Dancing Script', cursive;
-            font-size: 1.3rem;
+            font-size: 1.25rem;
+            font-weight: 400;
+            line-height: 1.9;
             color: var(--text-dark);
-            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 25px;
+            letter-spacing: 0.3px;
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background-color: var(--accent-color);
+            margin-left: 3px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        /* Letter Signature/Footer */
+        .letter-footer {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: var(--accent-color);
+            text-align: center;
+            margin-top: 30px;
+            letter-spacing: 0.5px;
         }
 
         /* ===== BUTTONS ===== */
         .button-container {
             margin-top: 50px;
-            z-index: 100;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         .btn {
-            background: var(--accent-color);
-            color: white;
+            padding: 13px 35px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 1px;
             border: none;
-            padding: 12px 30px;
             border-radius: 30px;
             cursor: pointer;
-            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 1px;
-            box-shadow: 0 5px 15px rgba(142, 125, 190, 0.3);
-            transition: 0.3s;
         }
 
-        .btn-close { display: none; background: #999; }
+        .btn-open {
+            background: linear-gradient(135deg, var(--accent-color) 0%, #7a6ab1 100%);
+            color: white;
+            opacity: 1;
+            transition: all 0.3s ease;
+        }
 
-        .wrapper.open ~ .button-container .btn-open { display: none; }
-        .wrapper.open ~ .button-container .btn-close { display: block; }
+        .btn-open:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(142, 125, 190, 0.4);
+        }
 
-        .cursor { border-left: 2px solid var(--accent-color); animation: blink 0.8s infinite; }
-        @keyframes blink { 50% { opacity: 0; } }
+        .btn-open:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-close {
+            background: linear-gradient(135deg, #b8b8b8 0%, #a0a0a0 100%);
+            color: white;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease 0.4s;
+        }
+
+        .wrapper.open .btn-open {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .wrapper.open .btn-close {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .btn-close:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-close:active {
+            transform: translateY(-1px);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .envelope-container {
+                height: 220px;
+            }
+
+            .envelope-flap {
+                border-left: 175px solid transparent;
+                border-right: 175px solid transparent;
+                border-top: 110px solid var(--envelope-color);
+            }
+
+            .envelope-flap::before {
+                top: -110px;
+                left: -175px;
+                width: 350px;
+                height: 110px;
+            }
+
+            .envelope-labels {
+                font-size: 0.75rem;
+                left: 20px;
+                line-height: 1.6;
+            }
+
+            .letter {
+                padding: 35px 25px;
+                min-height: 350px;
+            }
+
+            .letter-title {
+                font-size: 2rem;
+                margin-bottom: 25px;
+            }
+
+            .letter-text {
+                font-size: 1.1rem;
+                line-height: 1.7;
+            }
+
+            .letter-footer {
+                font-size: 1.1rem;
+                margin-top: 20px;
+            }
+
+            .btn {
+                padding: 11px 28px;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .envelope-container {
+                height: 180px;
+            }
+
+            .envelope-flap {
+                border-left: 150px solid transparent;
+                border-right: 150px solid transparent;
+                border-top: 90px solid var(--envelope-color);
+            }
+
+            .envelope-flap::before {
+                top: -90px;
+                left: -150px;
+                width: 300px;
+                height: 90px;
+            }
+
+            .letter {
+                padding: 30px 20px;
+                min-height: 320px;
+            }
+
+            .letter-title {
+                font-size: 1.7rem;
+                margin-bottom: 20px;
+                letter-spacing: 1px;
+            }
+
+            .letter-text {
+                font-size: 1rem;
+                line-height: 1.6;
+            }
+
+            .letter-footer {
+                font-size: 1rem;
+            }
+
+            .btn {
+                padding: 10px 24px;
+                font-size: 0.8rem;
+                width: 100%;
+            }
+
+            .button-container {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div class="wrapper" id="mainWrapper">
-        <div class="envelope-wrapper">
-            <div class="flap"></div>
-
-            <div class="envelope-front">
-                <div class="envelope-labels">
-                    From: <strong>Natalie</strong><br>
-                    To: <strong>Catrina</strong>
+        <div class="envelope-container">
+            <div class="envelope">
+                <!-- Envelope Front -->
+                <div class="envelope-front">
+                    <div class="envelope-labels">
+                        From: <strong>Natalie</strong><br>
+                        To: <strong>Catrina</strong>
+                    </div>
                 </div>
-            </div>
 
-            <div class="letter">
-                <div class="letter-title">I'm Sorry</div>
-                <p class="letter-text">
-                    <span id="typedText"></span><span class="cursor" id="cursor"></span>
-                </p>
-                <div id="signature" style="margin-top:20px; font-family:'Dancing Script'; color:var(--accent-color); font-weight:bold; font-size: 1.4rem;"></div>
+                <!-- Envelope Back -->
+                <div class="envelope-back"></div>
+
+                <!-- Envelope Flap -->
+                <div class="envelope-flap"></div>
             </div>
         </div>
-    </div>
 
-    <div class="button-container">
-        <button class="btn btn-open" onclick="toggleLetter(true)">Open the Letter ✉️</button>
-        <button class="btn btn-close" onclick="toggleLetter(false)">Close Letter</button>
+        <!-- Letter Inside -->
+        <div class="letter-container">
+            <div class="letter">
+                <div class="letter-content">
+                    <h1 class="letter-title">I'm Sorry</h1>
+                    <p class="letter-text">
+                        <span id="typewriter"></span><span class="typing-cursor" id="cursor"></span>
+                    </p>
+                    <div class="letter-footer" id="signature"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="button-container">
+            <button class="btn btn-open" onclick="openLetter()">Open the Letter ✉️</button>
+            <button class="btn btn-close" onclick="closeLetter()">Close Letter</button>
+        </div>
     </div>
 
     <script>
         const message = "I'm sorry, babe, for speaking out of anger. I deeply regret it. I hope you can forgive me, but even if you can't, I need you to know how truly sorry I am.";
         const signatureText = "Please, bati na tayo? 🥺";
         
-        let i = 0;
-        let j = 0;
+        let typingStarted = false;
+        let typingIndex = 0;
+        let signatureTypingIndex = 0;
         let isTyping = false;
 
-        function toggleLetter(isOpen) {
-            const wrapper = document.getElementById('mainWrapper');
-            if (isOpen) {
-                wrapper.classList.add('open');
-                setTimeout(startTyping, 1200); // Wait for unfold + slide
-            } else {
-                wrapper.classList.remove('open');
-                // Reset text
-                i = 0; j = 0; isTyping = false;
-                document.getElementById('typedText').innerHTML = "";
-                document.getElementById('signature').innerHTML = "";
-                document.getElementById('cursor').style.display = "inline-block";
+        function openLetter() {
+            document.getElementById('mainWrapper').classList.add('open');
+            if (!typingStarted) {
+                setTimeout(() => {
+                    typeWriter();
+                }, 1200);
+                typingStarted = true;
             }
         }
 
-        function startTyping() {
+        function closeLetter() {
+            document.getElementById('mainWrapper').classList.remove('open');
+            
+            // Reset typing
+            typingStarted = false;
+            typingIndex = 0;
+            signatureTypingIndex = 0;
+            isTyping = false;
+            
+            document.getElementById('typewriter').textContent = '';
+            document.getElementById('signature').textContent = '';
+        }
+
+        function typeWriter() {
             if (isTyping) return;
             isTyping = true;
-            
+
+            const typewriterElement = document.getElementById('typewriter');
+            const signatureElement = document.getElementById('signature');
+            const cursorElement = document.getElementById('cursor');
+
             function type() {
-                if (i < message.length) {
-                    document.getElementById('typedText').innerHTML += message.charAt(i);
-                    i++;
-                    setTimeout(type, 50);
-                } else if (j < signatureText.length) {
-                    document.getElementById('signature').innerHTML += signatureText.charAt(j);
-                    j++;
+                if (typingIndex < message.length) {
+                    typewriterElement.textContent += message.charAt(typingIndex);
+                    typingIndex++;
                     setTimeout(type, 50);
                 } else {
-                    document.getElementById('cursor').style.display = "none";
+                    // Start typing signature
+                    typeSignature();
                 }
             }
+
+            function typeSignature() {
+                if (signatureTypingIndex < signatureText.length) {
+                    signatureElement.textContent += signatureText.charAt(signatureTypingIndex);
+                    signatureTypingIndex++;
+                    setTimeout(typeSignature, 50);
+                } else {
+                    cursorElement.style.display = 'none';
+                    isTyping = false;
+                }
+            }
+
             type();
         }
     </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A Letter for Catrina</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@400;500;700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #f8f5f0;
-            --envelope-color: #f0e6d8;
-            --envelope-shadow: #d4c4b0;
-            --accent-color: #8e7dbe;
-            --text-dark: #3d3d3d;
-            --paper-color: #fffbf7;
-        }
-
-        body {
-            background: linear-gradient(135deg, var(--bg-color) 0%, #f5ede5 100%);
-            font-family: 'Poppins', sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-
-        .wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 450px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* ===== THE ENVELOPE ===== */
-        .envelope-wrapper {
-            position: relative;
-            width: 400px;
-            height: 280px;
-            background-color: var(--envelope-color);
-            border-radius: 0 0 8px 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            z-index: 1; /* Sits behind the letter when sliding out */
-        }
-
-        /* Front of the envelope (The part with the names) */
-        .envelope-front {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            z-index: 10; /* Always in front of the letter */
-            background: linear-gradient(135deg, var(--envelope-color) 0%, #e8dcc8 100%);
-            clip-path: polygon(0 0, 0 100%, 100% 100%, 100% 0, 50% 50%);
-            display: flex;
-            padding: 30px;
-            border-radius: 0 0 8px 8px;
-        }
-
-        .envelope-labels {
-            font-size: 0.9rem;
-            color: #777;
-            line-height: 1.8;
-            margin-top: 50px; /* Keep them below the flap area */
-        }
-
-        .envelope-labels strong { color: var(--text-dark); }
-
-        /* The Flap */
-        .flap {
-            position: absolute;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--envelope-color);
-            clip-path: polygon(0 0, 100% 0, 50% 50%);
-            transform-origin: top;
-            transition: transform 1.2s ease-in-out, z-index 0.6s;
-            z-index: 11; /* Initially in front of everything */
-            border-radius: 4px 4px 0 0;
-        }
-
-        .wrapper.open .flap {
-            transform: rotateX(180deg);
-            z-index: 0; /* Flip behind once open */
-        }
-
-        /* ===== THE LETTER ===== */
-        .letter {
-            position: absolute;
-            bottom: 5px;
-            width: 90%;
-            background: var(--paper-color);
-            padding: 40px 30px;
-            box-sizing: border-box;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            z-index: 5; /* Starts inside (between front and back) */
-            transition: transform 1.2s ease-in-out, opacity 0.8s;
-            opacity: 0;
-            border: 1px solid #f0e8d9;
-            text-align: center;
-        }
-
-        .wrapper.open .letter {
-            transform: translateY(-300px); /* Slides OUT and UP */
-            opacity: 1;
-            z-index: 15; /* Becomes the top layer */
-        }
-
-        .letter-title {
-            font-family: 'Playfair Display', serif;
-            font-style: italic;
-            color: var(--accent-color);
-            font-size: 2rem;
-            margin-bottom: 20px;
-        }
-
-        .letter-text {
-            font-family: 'Dancing Script', cursive;
-            font-size: 1.3rem;
-            color: var(--text-dark);
-            line-height: 1.6;
-        }
-
-        /* ===== BUTTONS ===== */
-        .button-container {
-            margin-top: 50px;
-            z-index: 100;
-        }
-
-        .btn {
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-family: 'Poppins', sans-serif;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 1px;
-            box-shadow: 0 5px 15px rgba(142, 125, 190, 0.3);
-            transition: 0.3s;
-        }
-
-        .btn-close { display: none; background: #999; }
-
-        .wrapper.open ~ .button-container .btn-open { display: none; }
-        .wrapper.open ~ .button-container .btn-close { display: block; }
-
-        .cursor { border-left: 2px solid var(--accent-color); animation: blink 0.8s infinite; }
-        @keyframes blink { 50% { opacity: 0; } }
-    </style>
-</head>
-<body>
-
-    <div class="wrapper" id="mainWrapper">
-        <div class="envelope-wrapper">
-            <div class="flap"></div>
-
-            <div class="envelope-front">
-                <div class="envelope-labels">
-                    From: <strong>Natalie</strong><br>
-                    To: <strong>Catrina</strong>
-                </div>
-            </div>
-
-            <div class="letter">
-                <div class="letter-title">I'm Sorry</div>
-                <p class="letter-text">
-                    <span id="typedText"></span><span class="cursor" id="cursor"></span>
-                </p>
-                <div id="signature" style="margin-top:20px; font-family:'Dancing Script'; color:var(--accent-color); font-weight:bold; font-size: 1.4rem;"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="button-container">
-        <button class="btn btn-open" onclick="toggleLetter(true)">Open the Letter ✉️</button>
-        <button class="btn btn-close" onclick="toggleLetter(false)">Close Letter</button>
-    </div>
-
-    <script>
-        const message = "I'm sorry, babe, for speaking out of anger. I deeply regret it. I hope you can forgive me, but even if you can't, I need you to know how truly sorry I am.";
-        const signatureText = "Please, bati na tayo? 🥺";
-        
-        let i = 0;
-        let j = 0;
-        let isTyping = false;
-
-        function toggleLetter(isOpen) {
-            const wrapper = document.getElementById('mainWrapper');
-            if (isOpen) {
-                wrapper.classList.add('open');
-                setTimeout(startTyping, 1200); // Wait for unfold + slide
-            } else {
-                wrapper.classList.remove('open');
-                // Reset text
-                i = 0; j = 0; isTyping = false;
-                document.getElementById('typedText').innerHTML = "";
-                document.getElementById('signature').innerHTML = "";
-                document.getElementById('cursor').style.display = "inline-block";
-            }
-        }
-
-        function startTyping() {
-            if (isTyping) return;
-            isTyping = true;
-            
-            function type() {
-                if (i < message.length) {
-                    document.getElementById('typedText').innerHTML += message.charAt(i);
-                    i++;
-                    setTimeout(type, 50);
-                } else if (j < signatureText.length) {
-                    document.getElementById('signature').innerHTML += signatureText.charAt(j);
-                    j++;
-                    setTimeout(type, 50);
-                } else {
-                    document.getElementById('cursor').style.display = "none";
-                }
-            }
-            type();
-        }
-    </script>
-</body>
-</html>
-
-
-
-PLEASE HELP ME IMPROVE THIS CODE
-THE FROM AND TO SHOULD ALREADY SHOW ON FRONT OF THE ENVELOPE AN THE ENVELOPE IMPROVE THE LOOKS OF IT BECCAUSE AS YOU CAN SEE THERE IS A LINE SHOWING AT THE LEFT SIDE I THINK THERE IS SOMETHING WRONG WITH THE SHADOW OR WHAT JUST FIX IT. AND ALSO CHANGE THE ANIMATION WHEN CLICKING THE OPEN THE LETTE BUTTON, MAKE THE ANIMATION AS IF THE ENVELOPE IS UNFOLDING AND THE LETTER IS SLIDING OUTSIDE OF THE ENVELOPE, BUT DO NOT MAKE IT SO UP THAT I CANNOT SEE THE LETTER ANYMORE. THE STYLE OF THE LETTER IS ALREADY OKAY AND ALSO THE FONT AND THE ANIMATION OF IT SO DON'T CHANGE ANYTHING ON THAT NOW I WANT YOU TO IMRPOVE THE CLOSE THE LETTER BUTTON IT SHOULD SHOW BELOW AND NOT BEING OVERLAP BY THE LETTER WNAD WHEN THE CLOSE THE LETTER BUTTON IS CLICKED AN ANIMATION OF THE LETTER GOING BACK INSIDE THE ENVELOPE AND THE ENVELLOPE FOLDING SHOULD SHOW UP BACK TO HOW IT IS. PLEASE HELP ME OUT HERE
-
-Got it! I carefully went through your code and your requests. Here’s what I’ve done in this improved version:
-
-Envelope look improvement
-
-Fixed the left-side line (it was caused by clip-path and box-shadow interacting).
-
-Made the envelope front more realistic with smooth shadow and flap depth.
-
-Animation improvements
-
-Clicking Open Letter now unfolds the flap naturally and slides the letter out just enough so you can see it.
-
-Clicking Close Letter reverses the animation: letter slides back in, flap folds back, button toggles nicely.
-
-Button fixes
-
-Close Letter now appears below the envelope, never overlapping the letter.
-
-Kept your letter fonts and typing animation unchanged.
-
-Here’s the updated working code:
-
-Improved Letter Animation
-· html
-.wrapper.open ~ .button-container .btn-close { display: inline-block; }
-
-.cursor { border-left: 2px solid var(--accent-color); animation: blink 0.8s infinite; }
-@keyframes blink { 50% { opacity: 0; } }
-</style>
-</head>
-<body>
-
-<div class="wrapper" id="mainWrapper">
-    <div class="envelope-wrapper">
-        <div class="flap"></div>
-        <div class="envelope-front">
-            <div class="envelope-labels">
-                From: <strong>Natalie</strong><br>
-                To: <strong>Catrina</strong>
-            </div>
-        </div>
-
-        <div class="letter">
-            <div class="letter-title">I'm Sorry</div>
-            <p class="letter-text">
-                <span id="typedText"></span><span class="cursor" id="cursor"></span>
-            </p>
-            <div id="signature" style="margin-top:20px; font-family:'Dancing Script'; color:var(--accent-color); font-weight:bold; font-size: 1.4rem;"></div>
-        </div>
-    </div>
-</div>
-
-<div class="button-container">
-    <button class="btn btn-open" onclick="toggleLetter(true)">Open the Letter ✉️</button>
-    <button class="btn btn-close" onclick="toggleLetter(false)">Close Letter</button>
-</div>
-
-<script>
-const message = "I'm sorry, babe, for speaking out of anger. I deeply regret it. I hope you can forgive me, but even if you can't, I need you to know how truly sorry I am.";
-const signatureText = "Please, bati na tayo? 🥺";
-let i = 0, j = 0, isTyping = false;
-
-function toggleLetter(isOpen) {
-    const wrapper = document.getElementById('mainWrapper');
-    if (isOpen) {
-        wrapper.classList.add('open');
-        setTimeout(startTyping, 1000);
-    } else {
-        wrapper.classList.remove('open');
-        i = 0; j = 0; isTyping = false;
-        document.getElementById('typedText').innerHTML = "";
-        document.getElementById('signature').innerHTML = "";
-        document.getElementById('cursor').style.display = "inline-block";
-    }
-}
-
-function startTyping() {
-    if (isTyping) return;
-    isTyping = true;
-    function type() {
-        if (i < message.length) {
-            document.getElementById('typedText').innerHTML += message.charAt(i);
-            i++;
-            setTimeout(type, 50);
-        } else if (j < signatureText.length) {
-            document.getElementById('signature').innerHTML += signatureText.charAt(j);
-            j++;
-            setTimeout(type, 50);
-        } else {
-            document.getElementById('cursor').style.display = "none";
-        }
-    }
-    type();
-}
-</script>
 
 </body>
 </html>
-
-I’ve cleaned up the envelope’s edges, fixed the shadow so the left line is gone, and improved the flap animation to unfold naturally. The letter now slides out smoothly without going too high, and the Close Letter button sits below the envelope and triggers a smooth reverse animation.
-
-This keeps all your original letter fonts and typing effect intact.
-
-
- /* ===== THE ENVELOPE ===== */
-        .envelope-wrapper {
-            position: relative;
-            width: 400px;
-            height: 280px;
-            background-color: var(--envelope-color);
-            border-radius: 0 0 8px 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            z-index: 1; /* Sits behind the letter when sliding out */
-        }
-
-        /* Front of the envelope (The part with the names) */
-        .envelope-front {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            z-index: 10; /* Always in front of the letter */
-            background: linear-gradient(135deg, var(--envelope-color) 0%, #e8dcc8 100%);
-            clip-path: polygon(0 0, 0 100%, 100% 100%, 100% 0, 50% 50%);
-            display: flex;
-            padding: 30px;
-            border-radius: 0 0 8px 8px;
-        }
-
-        .envelope-labels {
-            font-size: 0.9rem;
-            color: #777;
-            line-height: 1.8;
-            margin-top: 50px; /* Keep them below the flap area */
-        }
-
-        .envelope-labels strong { color: var(--text-dark); }
-
-        /* The Flap */
-        .flap {
-            position: absolute;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--envelope-color);
-            clip-path: polygon(0 0, 100% 0, 50% 50%);
-            transform-origin: top;
-            transition: transform 1.2s ease-in-out, z-index 0.6s;
-            z-index: 11; /* Initially in front of everything */
-            border-radius: 4px 4px 0 0;
-        }
-
-        .wrapper.open .flap {
-            transform: rotateX(180deg);
-            z-index: 0; /* Flip behind once open */
-        }
-
-
-this is how the envelope should look like, just copy the looks do not copy the animation.
-and remove the line when the letter is being typed
-
-
-
-Perfect! I understand exactly what you want:
-
-Keep the envelope look exactly as your snippet (the shape, flap, shadows, clip-path, colors).
-
-Keep your letter typing animation, but remove that vertical line (cursor) while typing.
-
-Here’s the updated CSS snippet for the envelope and letter typing fix:
-
-/* ===== THE ENVELOPE ===== */
-.envelope-wrapper {
-    position: relative;
-    width: 400px;
-    height: 280px;
-    background-color: var(--envelope-color);
-    border-radius: 0 0 8px 8px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    z-index: 1; /* Sits behind the letter when sliding out */
-}
-
-/* Front of the envelope (The part with the names) */
-.envelope-front {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    z-index: 10; /* Always in front of the letter */
-    background: linear-gradient(135deg, var(--envelope-color) 0%, #e8dcc8 100%);
-    clip-path: polygon(0 0, 0 100%, 100% 100%, 100% 0, 50% 50%);
-    display: flex;
-    padding: 30px;
-    border-radius: 0 0 8px 8px;
-}
-
-.envelope-labels {
-    font-size: 0.9rem;
-    color: #777;
-    line-height: 1.8;
-    margin-top: 50px; /* Keep them below the flap area */
-}
-
-.envelope-labels strong { color: var(--text-dark); }
-
-/* The Flap */
-.flap {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: var(--envelope-color);
-    clip-path: polygon(0 0, 100% 0, 50% 50%);
-    transform-origin: top;
-    transition: transform 1.2s ease-in-out, z-index 0.6s;
-    z-index: 11; /* Initially in front of everything */
-    border-radius: 4px 4px 0 0;
-}
-
-.wrapper.open .flap {
-    transform: rotateX(180deg);
-    z-index: 0; /* Flip behind once open */
-}
-
-/* ===== LETTER TYPING FIX ===== */
-.cursor {
-    display: none; /* Remove the blinking line */
-}
-✅ With this:
-
-The envelope looks exactly as your original design.
-
-The cursor line is hidden, so no vertical blinking line while typing.
-
-If you want, I can also update the full HTML/CSS/JS with your envelope style + the proper letter unfold animation + the Close Letter button working perfectly below. This way, everything will be polished and ready to use.
-
-Do you want me to do that next?
-
-
-
-
