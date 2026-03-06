@@ -4,15 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A Letter for Catrina</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@500&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Dancing+Script:wght@500;600&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-color: #fcfaf7;
-            --env-front: #ffffff;
-            --env-back: #f2ede4;
-            --env-flap: #e8e1d5;
-            --accent: #9b89b3;
-            --text: #444444;
+            --env-color: #ffffff;
+            --env-border: #ebe3d5;
+            --accent-purple: #9b89b3;
+            --text-main: #444444;
         }
 
         body {
@@ -23,196 +22,214 @@
             min-height: 100vh;
             background-color: var(--bg-color);
             font-family: 'Poppins', sans-serif;
-            overflow: hidden;
         }
 
-        .container {
-            position: relative;
+        .wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
+            perspective: 1500px;
         }
 
-        /* ===== THE ENVELOPE ===== */
+        /* ===== CLASSIC ENVELOPE ✉️ ===== */
         .envelope {
             position: relative;
-            width: 320px;
-            height: 200px;
-            background: var(--env-back);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
-            border-radius: 4px;
+            width: 350px;
+            height: 230px;
+            background: var(--env-color);
+            border: 1px solid var(--env-border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: transform 0.6s;
         }
 
-        /* The Flap - Using z-index 4 to stay on top initially */
+        /* The Flap */
         .flap {
             position: absolute;
             top: 0;
             width: 0;
             height: 0;
-            border-top: 110px solid var(--env-flap);
-            border-left: 160px solid transparent;
-            border-right: 160px solid transparent;
+            border-top: 130px solid var(--env-border);
+            border-left: 175px solid transparent;
+            border-right: 175px solid transparent;
             transform-origin: top;
             z-index: 4;
-            transition: transform 0.6s ease, z-index 0.1s 0.3s;
+            transition: transform 0.6s ease;
         }
 
-        /* The Pocket - Keeps letter hidden */
-        .pocket {
+        /* Front Face (Triangle folds like an icon) */
+        .front-folds {
             position: absolute;
             bottom: 0;
-            width: 320px;
-            height: 110px;
-            background: var(--env-front);
+            width: 0;
+            height: 0;
+            border-bottom: 115px solid #ffffff;
+            border-left: 175px solid #f9f6f1;
+            border-right: 175px solid #f9f6f1;
             z-index: 3;
-            border-radius: 0 0 4px 4px;
-        }
-
-        /* Side folds for a real look */
-        .pocket::before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            border-left: 160px solid #f9f9f9;
-            border-top: 110px solid transparent;
-        }
-        .pocket::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            border-right: 160px solid #f9f9f9;
-            border-top: 110px solid transparent;
         }
 
         .labels {
             position: absolute;
-            top: 65px;
+            top: 50%;
             left: 20px;
+            transform: translateY(-50%);
             z-index: 5;
-            font-size: 0.8rem;
-            color: #999;
-            transition: opacity 0.3s;
+            font-size: 0.85rem;
+            color: #888;
+            line-height: 1.8;
             pointer-events: none;
+            transition: opacity 0.3s;
         }
-        .labels b { color: var(--text); font-weight: 500; }
+        .labels b { color: var(--text-main); font-weight: 500; }
 
         /* ===== THE LETTER ===== */
         .letter {
             position: absolute;
-            bottom: 5px;
-            left: 10px;
-            width: 300px;
-            height: 180px;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            height: 90%;
             background: white;
-            z-index: 2; /* Sits behind the pocket and flap */
+            z-index: 2;
             padding: 40px 25px;
             box-sizing: border-box;
-            transition: transform 0.8s 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                        height 0.8s 0.6s ease;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: center;
-            box-shadow: 0 0 20px rgba(0,0,0,0.02);
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* ===== OPENING ANIMATION ===== */
-        .container.open .flap {
+        /* Open State Styles */
+        .wrapper.open .flap {
             transform: rotateX(180deg);
-            z-index: 1; /* Flips and goes behind everything */
+            z-index: 1;
         }
 
-        .container.open .letter {
-            transform: translateY(-160px);
-            height: 420px;
-            z-index: 5; /* Pop to the very top after sliding out */
+        .wrapper.open .letter {
+            height: 480px;
+            transform: translate(-50%, -150px);
+            z-index: 10;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         }
 
-        .container.open .labels {
-            opacity: 0;
-        }
+        .wrapper.open .labels { opacity: 0; }
 
-        /* ===== LETTER TEXT ===== */
-        .letter h1 {
+        /* ===== CONTENT STYLES ===== */
+        .letter-title {
             font-family: 'Playfair Display', serif;
-            font-size: 1.6rem;
-            color: var(--accent);
+            font-size: 1.8rem;
+            color: var(--accent-purple);
             margin-bottom: 20px;
-            opacity: 0;
-            transition: opacity 0.5s 1.2s;
+            font-weight: 700;
         }
 
-        .letter p {
+        .letter-body {
             font-family: 'Dancing Script', cursive;
-            font-size: 1.25rem;
-            line-height: 1.8;
-            color: var(--text);
-            margin: 0;
+            font-size: 1.35rem;
+            line-height: 1.6;
+            color: var(--text-main);
         }
 
-        .container.open .letter h1 { opacity: 1; }
+        .letter-sig {
+            margin-top: 25px;
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.4rem;
+            color: var(--accent-purple);
+            font-weight: 600;
+            display: block;
+        }
 
-        .btn-open {
+        /* ===== BUTTONS ===== */
+        .btn-main {
             margin-top: 50px;
             padding: 14px 40px;
-            background: var(--accent);
+            background: var(--accent-purple);
             color: white;
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            font-family: 'Poppins', sans-serif;
             font-size: 0.9rem;
             letter-spacing: 1px;
-            box-shadow: 0 6px 20px rgba(155, 137, 179, 0.3);
+            box-shadow: 0 5px 15px rgba(155, 137, 179, 0.4);
             transition: 0.3s;
+            z-index: 20;
         }
 
-        .btn-open:hover { transform: translateY(-3px); background: #8a78a5; }
-        .container.open .btn-open { display: none; }
+        .btn-main:hover { transform: translateY(-3px); background: #8a78a5; }
+
+        #closeBtn {
+            margin-top: 20px;
+            background: #eee;
+            color: #777;
+            display: none;
+        }
+
+        .wrapper.open #openBtn { display: none; }
+        .wrapper.open #closeBtn { display: block; }
 
     </style>
 </head>
 <body>
 
-<div class="container" id="card">
+<div class="wrapper" id="container">
     <div class="envelope">
         <div class="flap"></div>
         <div class="labels">
             From: <b>Natalie</b><br>
             To: <b>Catrina</b>
         </div>
+        
         <div class="letter">
-            <h1>I'm Sorry</h1>
-            <p id="message"></p>
+            <div class="letter-title">I'm Sorry</div>
+            <div class="letter-body" id="typewriter"></div>
+            <div class="letter-sig" id="signature"></div>
         </div>
-        <div class="pocket"></div>
+
+        <div class="front-folds"></div>
     </div>
-    <button class="btn-open" onclick="openCard()">Open the letter ✉️</button>
+
+    <button class="btn-main" id="openBtn" onclick="openLetter()">Open the letter ✉️</button>
+    <button class="btn-main" id="closeBtn" onclick="closeLetter()">Close the letter</button>
 </div>
 
 <script>
-    // I combined the message and the signature into one string for a continuous type-out
-    const fullText = "I'm sorry, babe, for speaking out of anger. I deeply regret it and I hope you can forgive me. I need you to know how truly sorry I am. \n\n Please, bati na tayo? 🥺";
+    const mainText = "I'm sorry, babe, for speaking out of anger, and I deeply regret it. I hope you can forgive me, but even if you can't, I need you to know how truly sorry I am.";
+    const sigText = "please, bati na tayo? 🥺";
     
-    function openCard() {
-        document.getElementById('card').classList.add('open');
-        // Wait for the letter to finish sliding up (1.5s) before typing
-        setTimeout(typeWriter, 1600);
+    let i = 0;
+    let isTyping = false;
+
+    function openLetter() {
+        document.getElementById('container').classList.add('open');
+        if (!isTyping) {
+            isTyping = true;
+            setTimeout(startTyping, 1200);
+        }
     }
 
-    let i = 0;
-    function typeWriter() {
-        const messageElement = document.getElementById("message");
-        if (i < fullText.length) {
-            // Check for new line character
-            if (fullText.charAt(i) === "\n") {
-                messageElement.innerHTML += "<br>";
+    function startTyping() {
+        const bodyEl = document.getElementById("typewriter");
+        const sigEl = document.getElementById("signature");
+
+        function type() {
+            if (i < mainText.length) {
+                bodyEl.innerHTML += mainText.charAt(i);
+                i++;
+                setTimeout(type, 45);
             } else {
-                messageElement.innerHTML += fullText.charAt(i);
+                // Once main text is done, type the purple signature
+                sigEl.innerHTML = sigText;
             }
-            i++;
-            setTimeout(typeWriter, 50); // Typing speed
         }
+        type();
+    }
+
+    function closeLetter() {
+        // Simple reload to reset the state smoothly
+        location.reload();
     }
 </script>
 
