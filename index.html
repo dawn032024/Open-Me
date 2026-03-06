@@ -7,12 +7,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@500&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #f8f5f2;
+            --bg-color: #fcfaf7;
             --env-front: #ffffff;
-            --env-back: #f0ebe4;
-            --env-flap: #e5dfd5;
+            --env-back: #f2ede4;
+            --env-flap: #e8e1d5;
             --accent: #9b89b3;
-            --text: #4a4a4a;
+            --text: #444444;
         }
 
         body {
@@ -39,10 +39,11 @@
             width: 320px;
             height: 200px;
             background: var(--env-back);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+            border-radius: 4px;
         }
 
-        /* The Flap */
+        /* The Flap - Using z-index 4 to stay on top initially */
         .flap {
             position: absolute;
             top: 0;
@@ -53,43 +54,48 @@
             border-right: 160px solid transparent;
             transform-origin: top;
             z-index: 4;
-            transition: transform 0.5s ease, z-index 0.2s 0.3s;
+            transition: transform 0.6s ease, z-index 0.1s 0.3s;
         }
 
-        /* The Front Cover (Pocket) */
+        /* The Pocket - Keeps letter hidden */
         .pocket {
             position: absolute;
             bottom: 0;
-            width: 0;
-            height: 0;
-            border-bottom: 110px solid var(--env-front);
-            border-left: 160px solid #ece8e1;
-            border-right: 160px solid #ece8e1;
-            z-index: 3;
-        }
-
-        .pocket::after { /* Bottom triangle to close the shape */
-            content: '';
-            position: absolute;
-            bottom: -110px;
-            left: -160px;
             width: 320px;
             height: 110px;
             background: var(--env-front);
             z-index: 3;
+            border-radius: 0 0 4px 4px;
         }
 
-        /* Labels */
+        /* Side folds for a real look */
+        .pocket::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            border-left: 160px solid #f9f9f9;
+            border-top: 110px solid transparent;
+        }
+        .pocket::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            border-right: 160px solid #f9f9f9;
+            border-top: 110px solid transparent;
+        }
+
         .labels {
             position: absolute;
-            top: 60px;
+            top: 65px;
             left: 20px;
             z-index: 5;
             font-size: 0.8rem;
-            color: #888;
+            color: #999;
             transition: opacity 0.3s;
+            pointer-events: none;
         }
-
         .labels b { color: var(--text); font-weight: 500; }
 
         /* ===== THE LETTER ===== */
@@ -100,66 +106,68 @@
             width: 300px;
             height: 180px;
             background: white;
-            z-index: 2; /* Hidden behind flap and pocket */
-            padding: 30px 20px;
+            z-index: 2; /* Sits behind the pocket and flap */
+            padding: 40px 25px;
             box-sizing: border-box;
-            transition: transform 0.6s 0.4s ease, height 0.6s 0.4s ease, z-index 0s 0.4s;
+            transition: transform 0.8s 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                        height 0.8s 0.6s ease;
             text-align: center;
-            box-shadow: 0 0 15px rgba(0,0,0,0.02);
+            box-shadow: 0 0 20px rgba(0,0,0,0.02);
+            overflow: hidden;
         }
 
-        /* ===== OPEN STATE ===== */
+        /* ===== OPENING ANIMATION ===== */
         .container.open .flap {
             transform: rotateX(180deg);
-            z-index: 1; /* Move behind the letter after opening */
+            z-index: 1; /* Flips and goes behind everything */
         }
 
         .container.open .letter {
-            transform: translateY(-150px);
-            height: 400px;
-            z-index: 5; /* Pop to the very front */
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transform: translateY(-160px);
+            height: 420px;
+            z-index: 5; /* Pop to the very top after sliding out */
         }
 
         .container.open .labels {
             opacity: 0;
         }
 
-        /* ===== CONTENT STYLES ===== */
+        /* ===== LETTER TEXT ===== */
         .letter h1 {
             font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             color: var(--accent);
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             opacity: 0;
-            transition: opacity 0.5s 1s;
+            transition: opacity 0.5s 1.2s;
         }
 
         .letter p {
             font-family: 'Dancing Script', cursive;
-            font-size: 1.2rem;
-            line-height: 1.6;
+            font-size: 1.25rem;
+            line-height: 1.8;
             color: var(--text);
+            margin: 0;
         }
 
         .container.open .letter h1 { opacity: 1; }
 
         .btn-open {
-            margin-top: 60px;
-            padding: 12px 35px;
+            margin-top: 50px;
+            padding: 14px 40px;
             background: var(--accent);
             color: white;
             border: none;
-            border-radius: 30px;
+            border-radius: 50px;
             cursor: pointer;
             font-family: 'Poppins', sans-serif;
             font-size: 0.9rem;
-            box-shadow: 0 5px 15px rgba(155, 137, 179, 0.3);
+            letter-spacing: 1px;
+            box-shadow: 0 6px 20px rgba(155, 137, 179, 0.3);
             transition: 0.3s;
         }
 
         .btn-open:hover { transform: translateY(-3px); background: #8a78a5; }
-        
         .container.open .btn-open { display: none; }
 
     </style>
@@ -183,19 +191,27 @@
 </div>
 
 <script>
-    const text = "I'm sorry, babe, for speaking out of anger. I deeply regret it and I hope you can forgive me. I need you to know how truly sorry I am. Please, bati na tayo? 🥺";
+    // I combined the message and the signature into one string for a continuous type-out
+    const fullText = "I'm sorry, babe, for speaking out of anger. I deeply regret it and I hope you can forgive me. I need you to know how truly sorry I am. \n\n Please, bati na tayo? 🥺";
     
     function openCard() {
         document.getElementById('card').classList.add('open');
-        setTimeout(typeWriter, 1500);
+        // Wait for the letter to finish sliding up (1.5s) before typing
+        setTimeout(typeWriter, 1600);
     }
 
     let i = 0;
     function typeWriter() {
-        if (i < text.length) {
-            document.getElementById("message").innerHTML += text.charAt(i);
+        const messageElement = document.getElementById("message");
+        if (i < fullText.length) {
+            // Check for new line character
+            if (fullText.charAt(i) === "\n") {
+                messageElement.innerHTML += "<br>";
+            } else {
+                messageElement.innerHTML += fullText.charAt(i);
+            }
             i++;
-            setTimeout(typeWriter, 40);
+            setTimeout(typeWriter, 50); // Typing speed
         }
     }
 </script>
